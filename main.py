@@ -14,6 +14,11 @@ def checkError():
         sys.exit(1)
 
 
+class LambdaType:
+    def __eq__(self, other):
+        return self.value == other.value
+
+
 
 # superclass
 # when a new instruction class is created, append it to a list
@@ -21,9 +26,6 @@ class Instruction:
     instructionList = []
     def __init_subclass__(cls):
         Instruction.instructionList.append(cls)
-
-
-
 
 
 class printf(Instruction):
@@ -36,7 +38,7 @@ class printf(Instruction):
 
 # has a name
 # has a str value
-class string:
+class string(LambdaType):
     def __init__(self, name: str, value: str):
         self.name = name
         self.value = value
@@ -44,7 +46,7 @@ class string:
         return f'{self.name} = {self.value}'
 
 
-class number:
+class number(LambdaType):
     def __init__(self, name: str, value: int):
         self.name = name
         self.value = value
@@ -60,6 +62,8 @@ class init(Instruction):
     def execute(self):
         if self.variableValue.isdigit(): # if it's a number
             stack.push(number(self.variableName, int(self.variableValue)))
+        elif self.variableValue.isBool(): # if it's a boolean
+            stack.push(string(self.variableName, self.variableValue))
         else: # if it's a string
             stack.push(string(self.variableName, self.variableValue))
 
@@ -69,6 +73,36 @@ class printvar(Instruction):
         self.name = name
     def execute(self):
         print(stack.get(self.name))
+
+
+
+class boolean(LambdaType):
+    def __init__(self, name: str, value: bool):
+        self.name = name
+        self.value = value
+    def __repr__(self):
+        return f'{self.name} = {self.value}'
+
+
+
+# takes two variable names
+# takes an argument for a variable name
+# stores whether the variables are equal in the variable name, the third parameter
+class equals(Instruction):
+    def __init__(self, var1: str, var2: str, name: str):
+        self.var1 = var1
+        self.var2 = var2
+        self.name = name
+    def execute(self):
+        if stack.get(self.var1) == stack.get(self.var2):
+            stack.push(boolean(self.name, True))
+        else:
+            stack.push(boolean(self.name, False))
+
+    
+    
+
+
 
 
 # takes two numbers which are bounds for the random integer
@@ -147,6 +181,9 @@ def dataProcess(data: list) -> list:
         elif (data[i] == 'pop'):
             newList.append(pop(data[i+1]))
             i += 1
+        elif (data[i] == 'equals'):
+            newList.append(equals(data[i+1], data[i+2], data[i+3]))
+            i += 3
         
 
     return newList
