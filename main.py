@@ -82,6 +82,13 @@ class randint:
     def execute(self):
         stack.push(number(self.name, random.randint(self.min, self.max)))
 
+class randomuniform:
+    def __init__(self, name: str, min: int, max: int):
+        self.name = name
+        self.min = min
+        self.max = max
+    def execute(self):
+        stack.push(number(self.name, random.uniform(self.min, self.max)))
 
 
 
@@ -118,6 +125,9 @@ def dataProcess(data: list) -> list:
         elif (data[i] == 'randint'):
             print(data[i+1], data[i+2], data[i+3])
             newList.append(randint(data[i+1], int(data[i+2]), int(data[i+3])))
+            i += 3
+        elif (data[i] == 'randomuniform'):
+            newList.append(randomuniform(data[i+1], float(data[i+2]), float(data[i+3])))
             i += 3
         
 
