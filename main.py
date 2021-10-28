@@ -90,6 +90,12 @@ class randomuniform:
     def execute(self):
         stack.push(number(self.name, random.uniform(self.min, self.max)))
 
+class pop:
+    def __init__(self, name: str):
+        self.name = name
+    def execute(self):
+        stack.pop(self.name)
+
 
 
 
@@ -107,10 +113,19 @@ class Stack:
             if item.name == name:
                 return item.value
         return 'None'
+    # removes a variable from the stack by its name
+    def pop(self, name):
+        for item in self.data:
+            if item.name == name:
+                self.data.remove(item)
+                return
 
 
 
 def dataProcess(data: list) -> list:
+    '''
+    processes the data and returns a list of objects. Each object represents a specific instruction
+    '''
     newList: list = []
     for i in range(len(data)):
         if data[i] == 'print':
@@ -129,6 +144,9 @@ def dataProcess(data: list) -> list:
         elif (data[i] == 'randomuniform'):
             newList.append(randomuniform(data[i+1], float(data[i+2]), float(data[i+3])))
             i += 3
+        elif (data[i] == 'pop'):
+            newList.append(pop(data[i+1]))
+            i += 1
         
 
     return newList
