@@ -116,12 +116,6 @@ class equals(Instruction):
             stack.push(boolean(self.name, False))
 
 
-
-    
-
-
-
-
 # takes two numbers which are bounds for the random integer
 # sets a value between the bounds for the random integer
 # takes a string value which will be used to name the variable the value is stored in
@@ -191,13 +185,25 @@ class IfStatement(Instruction):
         if the value of the variable is set to true at the point of runtime,
         the instructions will be executed in self.instructions
         '''
+        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
         self.condition = condition
         self.instructions = instructions
+        self.elseInstructions = []
 
     def execute(self):
         if stack.get(self.condition): # check if the condition is true, then execute the instructions if it is
             execute(self.instructions)
+        else:
+            execute(self.elseInstructions)
 
+
+class ElseStatement(Instruction):
+    def __init__(self, instructions: list):
+        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
+        self.instructions = instructions
+
+    def execute(self):
+        execute(self.instructions)
 
 
 def dataProcess(data: list) -> list:
@@ -239,7 +245,11 @@ def dataProcess(data: list) -> list:
             body: list = dataProcess(data[i+1:])
             newList.append(IfStatement(data[i+1], body))
             i += Instruction.getNumberOfWordsInInstructionSet(body) + 2 # add 2 because of the end instruction at the end of the body
-           
+        
+        elif data[i] == 'else':
+            body: list = dataProcess(data[i+1:])
+            newList[-1].elseInstructions = body # add the else instructions to the last if statement
+            i += Instruction.getNumberOfWordsInInstructionSet(body) + 2
             
         elif data[i] == 'end':
             return newList
@@ -277,8 +287,11 @@ if __name__ == '__main__':
 
 '''
 bugs:
-    when an if statement is used, the body is activated once, then once more if the condition is true.
-        - because the variable of iteration cannot be muted while the for loop is running
+    
+
+ideas:
+    - functions
+    - while loops
 
 
 '''
