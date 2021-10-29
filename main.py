@@ -82,6 +82,20 @@ class init(Instruction):
             stack.push(string(self.variableName, self.variableValue))
 
 
+class func(LambdaType):
+    def __init__(self, name: str, body: list):
+        self.words = Instruction.getNumberOfWordsInInstructionSet(body)
+        self.name = name
+        self.value = body
+
+    def __repr__(self):
+        return f'{self.name} = {self.value}'
+    
+    def execute(self):
+        for instruction in self.value:
+            instruction.execute()
+
+
 class printvar(Instruction):
     def __init__(self, name: str):
         self.words = 2
@@ -159,8 +173,11 @@ class Stack:
     def get(self, name):
         for item in self.data:
             if item.name == name:
-                return item.value
-        return 'None'
+                if (item.__class__.__name__ == 'func'):
+                    return item
+                else:
+                    return item.value
+        return None
     # removes a variable from the stack by its name
     def pop(self, name):
         for item in self.data:
@@ -176,6 +193,15 @@ class End:
         self.words = 1
     def execute(self):
         pass
+
+
+class call(Instruction):
+    def __init__(self, name: str):
+        self.words = 2
+        self.name = name
+    def execute(self):
+        func = stack.get(self.name)
+        func.execute()
 
 
 class IfStatement(Instruction):
@@ -249,8 +275,18 @@ def dataProcess(data: list) -> list:
         elif data[i] == 'else':
             body: list = dataProcess(data[i+1:])
             newList[-1].elseInstructions = body # add the else instructions to the last if statement
+            i += Instruction.getNumberOfWordsInInstructionSet(body) + 1 # add 1 because of the end instruction at the end of the body
+
+
+        elif data[i] == 'func':
+            body: list = dataProcess(data[i+1:])
+            stack.push(func(data[i+1], body))
             i += Instruction.getNumberOfWordsInInstructionSet(body) + 2
             
+        elif data[i] == 'call':
+            newList.append(call(data[i+1]))
+            i += 1
+
         elif data[i] == 'end':
             return newList
         
@@ -274,6 +310,7 @@ def main():
     checkError()
     data: list = loadData()
     proccessedData: list = dataProcess(data)
+    #print(proccessedData)
     execute(proccessedData)
     # debugging stuff
     # print('--------------------------------------')
