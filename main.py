@@ -26,10 +26,23 @@ class Instruction:
     instructionList = []
     def __init_subclass__(cls):
         Instruction.instructionList.append(cls)
+    
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+    @staticmethod
+    def getNumberOfWordsInInstructionSet(instructions: list):
+        count = 0
+        for instruction in instructions:
+            count += instruction.words
+        
+        return count
 
 
 class printf(Instruction):
     def __init__(self, data: list):
+        self.words = 2
         self.data = data
     def execute(self):
         print(self.data)
@@ -56,6 +69,7 @@ class number(LambdaType):
 # instruction that adds a new variable to the stack
 class init(Instruction):
     def __init__(self, name: str, value: str):
+        self.words = 3
         self.variableName = name
         self.variableValue = value
 
@@ -70,6 +84,7 @@ class init(Instruction):
 
 class printvar(Instruction):
     def __init__(self, name: str):
+        self.words = 2
         self.name = name
     def execute(self):
         print(stack.get(self.name))
@@ -90,6 +105,7 @@ class boolean(LambdaType):
 # stores whether the variables are equal in the variable name, the third parameter
 class equals(Instruction):
     def __init__(self, var1: str, var2: str, name: str):
+        self.words = 4
         self.var1 = var1
         self.var2 = var2
         self.name = name
@@ -99,7 +115,8 @@ class equals(Instruction):
         else:
             stack.push(boolean(self.name, False))
 
-    
+
+
     
 
 
@@ -110,6 +127,7 @@ class equals(Instruction):
 # takes a string value which will be used to name the variable the value is stored in
 class randint:
     def __init__(self, name: str, min: int, max: int):
+        self.words = 4
         self.name = name
         self.min = min
         self.max = max
@@ -118,6 +136,7 @@ class randint:
 
 class randomuniform:
     def __init__(self, name: str, min: int, max: int):
+        self.words = 4
         self.name = name
         self.min = min
         self.max = max
@@ -126,6 +145,7 @@ class randomuniform:
 
 class pop:
     def __init__(self, name: str):
+        self.words = 2
         self.name = name
     def execute(self):
         stack.pop(self.name)
@@ -154,6 +174,30 @@ class Stack:
                 self.data.remove(item)
                 return
 
+class End:
+    '''
+    this instruction is used for ending if statements and stuff like that
+    '''
+    def __init__(self):
+        self.words = 1
+    def execute(self):
+        pass
+
+
+class IfStatement(Instruction):
+    def __init__(self, condition: str, instructions: list):
+        '''
+        condition is actually a variable name pointing to a boolean value
+        if the value of the variable is set to true at the point of runtime,
+        the instructions will be executed in self.instructions
+        '''
+        self.condition = condition
+        self.instructions = instructions
+
+    def execute(self):
+        if stack.get(self.condition): # check if the condition is true, then execute the instructions if it is
+            execute(self.instructions)
+
 
 
 def dataProcess(data: list) -> list:
@@ -161,32 +205,51 @@ def dataProcess(data: list) -> list:
     processes the data and returns a list of objects. Each object represents a specific instruction
     '''
     newList: list = []
-    for i in range(len(data)):
-        if data[i] == 'print':
+    i = 0
+    while i < len(data):
+        if data[i] == 'print':   
             newList.append(printf(data[i+1]))
             i += 1
-        elif (data[i] == 'init'):
+
+        elif data[i] == 'init':
             newList.append(init(data[i+1], data[i+2]))
             i += 2
-        elif (data[i] == 'printvar'):
+
+        elif data[i] == 'printvar':
             newList.append(printvar(data[i+1]))
             i += 1
-        elif (data[i] == 'randint'):
-            print(data[i+1], data[i+2], data[i+3])
+
+        elif data[i] == 'randint':
             newList.append(randint(data[i+1], int(data[i+2]), int(data[i+3])))
             i += 3
-        elif (data[i] == 'randomuniform'):
+            
+        elif data[i] == 'randomuniform':
             newList.append(randomuniform(data[i+1], float(data[i+2]), float(data[i+3])))
             i += 3
-        elif (data[i] == 'pop'):
+
+        elif data[i] == 'pop':
             newList.append(pop(data[i+1]))
             i += 1
-        elif (data[i] == 'equals'):
+
+        elif data[i] == 'equals':
             newList.append(equals(data[i+1], data[i+2], data[i+3]))
             i += 3
+
+        elif data[i] == 'if':
+            body: list = dataProcess(data[i+1:])
+            newList.append(IfStatement(data[i+1], body))
+            i += Instruction.getNumberOfWordsInInstructionSet(body) + 2 # add 2 because of the end instruction at the end of the body
+           
+            
+        elif data[i] == 'end':
+            return newList
         
+        i += 1
 
     return newList
+
+
+
 
 def execute(instructions: list):
     for instruction in instructions:
@@ -201,13 +264,21 @@ def main():
     checkError()
     data: list = loadData()
     proccessedData: list = dataProcess(data)
-
     execute(proccessedData)
     # debugging stuff
-    print('--------------------------------------')
-    print(stack)
+    # print('--------------------------------------')
+    # print(stack)
      
 
 
 if __name__ == '__main__':
     main()
+
+
+'''
+bugs:
+    when an if statement is used, the body is activated once, then once more if the condition is true.
+        - because the variable of iteration cannot be muted while the for loop is running
+
+
+'''
