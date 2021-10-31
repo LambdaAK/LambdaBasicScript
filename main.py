@@ -14,6 +14,8 @@ def checkError():
         sys.exit(1)
 
 
+
+
 class LambdaType:
     def __eq__(self, other):
         return self.value == other.value
@@ -76,8 +78,10 @@ class init(Instruction):
     def execute(self):
         if self.variableValue.isdigit(): # if it's a number
             stack.push(number(self.variableName, int(self.variableValue)))
-        elif self.variableValue.isBool(): # if it's a boolean
-            stack.push(string(self.variableName, self.variableValue))
+        elif self.variableValue == "true": # if it's a boolean
+            stack.push(string(self.variableName, True))
+        elif self.variableValue == "false": # if it's a boolean
+            stack.push(string(self.variableName, False))
         else: # if it's a string
             stack.push(string(self.variableName, self.variableValue))
 
