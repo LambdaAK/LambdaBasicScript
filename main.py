@@ -220,11 +220,24 @@ class IfStatement(Instruction):
         self.instructions = instructions
         self.elseInstructions = []
 
+
+class WhileStatement(Instruction):
+    def __init__(self, condition: str, instructions: list):
+        '''
+        condition is actually a variable name pointing to a boolean value
+        if the value of the variable is set to true at the point of runtime,
+        the instructions will be executed in self.instructions
+        '''
+        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
+        self.condition = condition
+        self.instructions = instructions
+
     def execute(self):
-        if stack.get(self.condition): # check if the condition is true, then execute the instructions if it is
-            execute(self.instructions)
-        else:
-            execute(self.elseInstructions)
+        while self.condition:
+            if stack.get(self.condition): # check if the condition is true, then execute the instructions if it is
+                execute(self.instructions)
+            else:
+                execute(self.elseInstructions)
 
 
 class ElseStatement(Instruction):
@@ -281,6 +294,11 @@ def dataProcess(data: list) -> list:
             newList[-1].elseInstructions = body # add the else instructions to the last if statement
             i += Instruction.getNumberOfWordsInInstructionSet(body) + 1 # add 1 because of the end instruction at the end of the body
 
+
+        elif data[i] == 'while':
+            body: list = dataProcess(data[i+1:])
+            newList.append(WhileStatement(data[i+1], body))
+            i += Instruction.getNumberOfWordsInInstructionSet(body) + 2
 
         elif data[i] == 'func':
             body: list = dataProcess(data[i+1:])
