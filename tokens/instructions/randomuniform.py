@@ -7,5 +7,5 @@ class randomuniform:
         self.name = name
         self.min = min
         self.max = max
-    def execute(self):
+    def execute(self, stack):
         stack.push(number(self.name, random.uniform(self.min, self.max)))

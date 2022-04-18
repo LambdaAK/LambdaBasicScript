@@ -6,4 +6,4 @@ class call(Instruction):
         self.name = name
     def execute(self, stack):
         func = stack.get(self.name)
-        func.execute()
+        func.execute(stack)

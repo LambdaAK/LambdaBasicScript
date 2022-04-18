@@ -7,7 +7,7 @@ class equals(Instruction):
         self.var1 = var1
         self.var2 = var2
         self.name = name
-    def execute(self):
+    def execute(self, stack):
         if stack.get(self.var1) == stack.get(self.var2):
             stack.push(boolean(self.name, True))
         else:

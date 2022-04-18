@@ -7,5 +7,5 @@ class randint:
         self.name = name
         self.min = min
         self.max = max
-    def execute(self):
+    def execute(self, stack):
         stack.push(number(self.name, random.randint(self.min, self.max)))

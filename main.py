@@ -39,48 +39,14 @@ def checkError():
         sys.exit(1)
 
 
-
-
-
-# superclass
-# when a new instruction class is created, append it to a list
-
-
-# has a name
-# has a str value
-
-
-
-
-
-# instruction that adds a new variable to the stack
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# takes two variable names
-# takes an argument for a variable name
-# stores whether the variables are equal in the variable name, the third parameter
-
-
-
-# takes two numbers which are bounds for the random integer
-# sets a value between the bounds for the random integer
-# takes a string value which will be used to name the variable the value is stored in
-
-
-
 stack = Stack()
+
+
+def execute(instructions: list):
+    for instruction in instructions:
+        instruction.execute(stack)
+    
+
 
 def dataProcess(data: list) -> list:
     '''
@@ -148,19 +114,6 @@ def dataProcess(data: list) -> list:
         i += 1
 
     return newList
-
-
-
-
-def execute(instructions: list):
-    for instruction in instructions:
-        if ['call', 'IfStatement', 'WhileStatement'].count(instruction.__class__.__name__) > 0:
-            instruction.execute(stack)
-        else:
-            instruction.execute()
-    
-
-
 
 
 def main():

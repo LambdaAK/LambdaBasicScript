@@ -4,5 +4,5 @@ class End:
     '''
     def __init__(self):
         self.words = 1
-    def execute(self):
+    def execute(self, stack):
         pass

@@ -3,4 +3,11 @@ func test
     print testing
 end
 
+init b True
+
+printvar b
+
 call test
+
+
+
