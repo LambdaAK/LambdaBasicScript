@@ -1,5 +1,30 @@
 import sys
 import random
+from tokens.LambdaTypes.LambdaType import LambdaType
+from tokens.LambdaTypes.Instruction import Instruction
+
+from tokens.instructions.printf import printf
+from tokens.instructions.printvar import printvar
+from tokens.instructions.equals import equals
+from tokens.instructions.randint import randint
+from tokens.instructions.randomuniform import randomuniform
+from tokens.instructions.pop import pop
+from tokens.instructions.call import call
+
+from tokens.LambdaTypes.string import string
+from tokens.LambdaTypes.func import func
+from tokens.LambdaTypes.number import number
+from tokens.LambdaTypes.boolean import boolean
+from tokens.instructions.init import init
+
+
+from tokens.structures.IfStatement import IfStatement
+from tokens.structures.WhileStatement import WhileStatement
+from tokens.structures.End import End
+from tokens.structures.ElseStatement import ElseStatement
+
+from util.Stack import Stack
+
 
 #reads the file from a paremeters
 # splits each word into a list
@@ -16,238 +41,46 @@ def checkError():
 
 
 
-class LambdaType:
-    def __eq__(self, other):
-        return self.value == other.value
-
-
 
 # superclass
 # when a new instruction class is created, append it to a list
-class Instruction:
-    instructionList = []
-    def __init_subclass__(cls):
-        Instruction.instructionList.append(cls)
-    
-    def __repr__(self):
-        return self.__class__.__name__
 
-
-    @staticmethod
-    def getNumberOfWordsInInstructionSet(instructions: list):
-        count = 0
-        for instruction in instructions:
-            count += instruction.words
-        
-        return count
-
-
-class printf(Instruction):
-    def __init__(self, data: list):
-        self.words = 2
-        self.data = data
-    def execute(self):
-        print(self.data)
-    def __repr__(self):
-        return f'print object for value {self.data}'
 
 # has a name
 # has a str value
-class string(LambdaType):
-    def __init__(self, name: str, value: str):
-        self.name = name
-        self.value = value
-    def __repr__(self):
-        return f'{self.name} = {self.value}'
 
 
-class number(LambdaType):
-    def __init__(self, name: str, value: int):
-        self.name = name
-        self.value = value
-    def __repr__(self):
-        return f'{self.name} = {self.value}'
+
+
 
 # instruction that adds a new variable to the stack
-class init(Instruction):
-    def __init__(self, name: str, value: str):
-        self.words = 3
-        self.variableName = name
-        self.variableValue = value
-
-    def execute(self):
-        if self.variableValue.isdigit(): # if it's a number
-            stack.push(number(self.variableName, int(self.variableValue)))
-        elif self.variableValue == "true": # if it's a boolean
-            stack.push(string(self.variableName, True))
-        elif self.variableValue == "false": # if it's a boolean
-            stack.push(string(self.variableName, False))
-        else: # if it's a string
-            stack.push(string(self.variableName, self.variableValue))
-
-
-class func(LambdaType):
-    def __init__(self, name: str, body: list):
-        self.words = Instruction.getNumberOfWordsInInstructionSet(body)
-        self.name = name
-        self.value = body
-
-    def __repr__(self):
-        return f'{self.name} = {self.value}'
-    
-    def execute(self):
-        for instruction in self.value:
-            instruction.execute()
-
-
-class printvar(Instruction):
-    def __init__(self, name: str):
-        self.words = 2
-        self.name = name
-    def execute(self):
-        print(stack.get(self.name))
 
 
 
-class boolean(LambdaType):
-    def __init__(self, name: str, value: bool):
-        self.name = name
-        self.value = value
-    def __repr__(self):
-        return f'{self.name} = {self.value}'
+
+
+
+
+
+
+
+
 
 
 
 # takes two variable names
 # takes an argument for a variable name
 # stores whether the variables are equal in the variable name, the third parameter
-class equals(Instruction):
-    def __init__(self, var1: str, var2: str, name: str):
-        self.words = 4
-        self.var1 = var1
-        self.var2 = var2
-        self.name = name
-    def execute(self):
-        if stack.get(self.var1) == stack.get(self.var2):
-            stack.push(boolean(self.name, True))
-        else:
-            stack.push(boolean(self.name, False))
+
 
 
 # takes two numbers which are bounds for the random integer
 # sets a value between the bounds for the random integer
 # takes a string value which will be used to name the variable the value is stored in
-class randint:
-    def __init__(self, name: str, min: int, max: int):
-        self.words = 4
-        self.name = name
-        self.min = min
-        self.max = max
-    def execute(self):
-        stack.push(number(self.name, random.randint(self.min, self.max)))
-
-class randomuniform:
-    def __init__(self, name: str, min: int, max: int):
-        self.words = 4
-        self.name = name
-        self.min = min
-        self.max = max
-    def execute(self):
-        stack.push(number(self.name, random.uniform(self.min, self.max)))
-
-class pop:
-    def __init__(self, name: str):
-        self.words = 2
-        self.name = name
-    def execute(self):
-        stack.pop(self.name)
 
 
 
-
-class Stack:
-    def __init__(self):
-        self.data = []
-    def __repr__(self):
-        return f'Stack memory: {self.data}'
-
-    def push(self, value):
-        self.data.append(value)
-    
-    def get(self, name):
-        for item in self.data:
-            if item.name == name:
-                if (item.__class__.__name__ == 'func'):
-                    return item
-                else:
-                    return item.value
-        return None
-    # removes a variable from the stack by its name
-    def pop(self, name):
-        for item in self.data:
-            if item.name == name:
-                self.data.remove(item)
-                return
-
-class End:
-    '''
-    this instruction is used for ending if statements and stuff like that
-    '''
-    def __init__(self):
-        self.words = 1
-    def execute(self):
-        pass
-
-
-class call(Instruction):
-    def __init__(self, name: str):
-        self.words = 2
-        self.name = name
-    def execute(self):
-        func = stack.get(self.name)
-        func.execute()
-
-
-class IfStatement(Instruction):
-    def __init__(self, condition: str, instructions: list):
-        '''
-        condition is actually a variable name pointing to a boolean value
-        if the value of the variable is set to true at the point of runtime,
-        the instructions will be executed in self.instructions
-        '''
-        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
-        self.condition = condition
-        self.instructions = instructions
-        self.elseInstructions = []
-
-
-class WhileStatement(Instruction):
-    def __init__(self, condition: str, instructions: list):
-        '''
-        condition is actually a variable name pointing to a boolean value
-        if the value of the variable is set to true at the point of runtime,
-        the instructions will be executed in self.instructions
-        '''
-        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
-        self.condition = condition
-        self.instructions = instructions
-
-    def execute(self):
-        while self.condition:
-            if stack.get(self.condition): # check if the condition is true, then execute the instructions if it is
-                execute(self.instructions)
-            else:
-                execute(self.elseInstructions)
-
-
-class ElseStatement(Instruction):
-    def __init__(self, instructions: list):
-        self.words = Instruction.getNumberOfWordsInInstructionSet(instructions) + 1
-        self.instructions = instructions
-
-    def execute(self):
-        execute(self.instructions)
-
+stack = Stack()
 
 def dataProcess(data: list) -> list:
     '''
@@ -321,10 +154,13 @@ def dataProcess(data: list) -> list:
 
 def execute(instructions: list):
     for instruction in instructions:
-        instruction.execute()
+        if ['call', 'IfStatement', 'WhileStatement'].count(instruction.__class__.__name__) > 0:
+            instruction.execute(stack)
+        else:
+            instruction.execute()
     
 
-stack = Stack()
+
 
 
 def main():
@@ -354,3 +190,6 @@ ideas:
 
 
 '''
+
+
+

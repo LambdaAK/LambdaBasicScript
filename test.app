@@ -1,9 +1,6 @@
-func main
+func test
     print hi
-    print souse
+    print testing
 end
 
-init c True
-while c
-    call main
-end
+call test
